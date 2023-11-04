@@ -16,4 +16,20 @@ Funkcje do optymalizacji należy pobrać z benchmarku CEC2017, którego kod da s
 znaleźć w Pythonie, R i C.
 
 ## Rzeczy do zastanowienia się:
-* Czy używamy gotowej implementacji algorytmu ewolucyjnego?
+* Jakie wymiary funkcji z CEC2017 użyć?
+* Q-learning?
+* Jak oceniamy funkcje?
+  * ilość wywołań funkcji celu = const?
+  * pozostałe parametry?
+
+## Rodzaje krzyżowania:
+   * Krzyżowanie jednopunktowe. Wybieramy miejsce rozcięcia. 
+     Potomek 1 ma kod rodzica 1 od początku do wybranego miejsca, a dalej ma 
+     kod rodzica 2. Potomek 2 dostaje resztę materiału genetycznego.
+   * Krzyżowania wymieniające – krzyżowanie równomierne. Dla każdego genu losujemy
+     liczbę U(0, 1). Jeśli wyszło mniej niż pe (parametr operacji krzyżowania) to 
+     bierzemy gen od rodzica 1. Gen pochodzi od rodzica 2 w przeciwnym przypadku.
+   * Krzyżowanie uśredniające w wariancie podstawowym to ważone
+     uśrednianie z losowymi współ-czynnikami (wagami)
+   * Krzyżowanie uśredniające w wariancie rozszerzonym wprowadza niezależne wagi dla każdej
+     współrzędnej (genu)
