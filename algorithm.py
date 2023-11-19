@@ -5,10 +5,10 @@ import numpy as np
 
 
 class CrossingType(Enum):
-    SINGLE_POINT = 1
-    UNIFORM = 2
-    SIMPLE_INTERMEDIATE = 3
-    COMPLEX_INTERMEDIATE = 4
+    SINGLE_POINT = 0
+    UNIFORM = 1
+    SIMPLE_INTERMEDIATE = 2
+    COMPLEX_INTERMEDIATE = 3
 
 
 def single_point_crossing(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:

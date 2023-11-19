@@ -22,6 +22,7 @@ def q_learning_greedy(env: gym.Env, learning_rate, discount_factor, iterations, 
             if random.uniform(0, 1) < epsilon:
                 action = env.action_space.sample()
             else:
+                # action = env.action_space[np.argmax(Q[state, :])]
                 action = np.argmax(Q[state, :])
 
             # Take action and observe next state and reward
@@ -112,4 +113,4 @@ if __name__ == '__main__':
     q_learning_greedy(env, 0.8, 0.9, 500, 0.1, 10)
     q_learning_boltzmann(env, 0.8, 0.9, 500, 0.9, 10)
     plt.title("Greedy Vs Boltzmann")
-    plt.savefig(f"greedy_v_boltzmann.png")
+    plt.show()
