@@ -144,13 +144,19 @@ def succession(population: np.array, mutants: np.array, population_quality: np.a
     return new_population, new_population_quality
 
 
+def calculate_avg_distance(population: np.array) -> float:
+    return np.mean(np.linalg.norm(population - np.mean(population, axis=0), axis=1))
+
+
 def evolutionary_algorithm(f: Callable, population: np.array, mutation_value: float = None,
                            mutation_probability: float = None, elite_size: int = None,
                            t_max: int = None, crossing_type: CrossingType = None, crossing_probability: float = None) -> \
-        Tuple[np.array, float]:
+        Tuple[np.array, float, float, float]:
     t = 0
     population_quality = calculate_quality(f, population)
     best_individual, best_quality = find_best(population, population_quality)
+    success_count = 0
+
     while not is_solved(t, t_max):
         current_reproduction = reproduction(population, population_quality)
         current_mutants = genetic_operations(current_reproduction, mutation_value, mutation_probability, crossing_type,
@@ -160,7 +166,15 @@ def evolutionary_algorithm(f: Callable, population: np.array, mutation_value: fl
         if best_mutant_quality <= best_quality:
             best_individual = best_mutant
             best_quality = best_mutant_quality
-        population, population_quality = succession(population, current_mutants, population_quality, mutants_quality,
+        population, new_population_quality = succession(population, current_mutants, population_quality, mutants_quality,
                                                     elite_size)
+        
+        if np.mean(new_population_quality) > np.mean(population_quality):
+            success_count += 1
+
         t += 1
-    return best_individual, best_quality
+
+    avg_distance = calculate_avg_distance(population)
+    sucess_percent = success_count / t_max
+
+    return best_individual, best_quality, sucess_percent, avg_distance
