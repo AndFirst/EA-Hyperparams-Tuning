@@ -82,10 +82,12 @@ class EvolutionaryAlgorithm:
 
         num_points = len(self._population)
         sum = 0.
+        counter = 0
         for i in range(num_points):
             for j in range(i + 1, num_points):
                 sum += distance(self._population[i], self._population[j])
-        return sum / num_points
+                counter += 1
+        return sum / counter
 
     def get_percent_of_successes(self) -> float:
         return self._percent_of_successes
