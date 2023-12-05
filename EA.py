@@ -3,8 +3,6 @@ import numpy as np
 from typing import Callable, Tuple, Dict
 from enum import Enum
 
-from cec2017.simple import f7
-
 
 class CrossingType(Enum):
     SINGLE_POINT = 0
@@ -25,9 +23,9 @@ class EvolutionaryAlgorithm:
                  crossing_type: CrossingType = CrossingType.SINGLE_POINT,
                  crossing_prob: float = 0.5) \
             -> None:
-        self._population: np.array = self._generate_start_population(bounds, population_size, dimension)
-        self._population_quality: np.array = None
         self._f: Callable[[np.array], np.array] = f
+        self._population: np.array = self._generate_start_population(bounds, population_size, dimension)
+        self._population_quality: np.array = self._calculate_quality(self._population)
         self._elite_size: int = elite_size
 
         self._mutation_rate: float = mutation_rate
@@ -36,18 +34,18 @@ class EvolutionaryAlgorithm:
         self._crossing_type: CrossingType = crossing_type
         self._crossing_prob: float = crossing_prob
 
-        self._best_individual: np.array = None
-        self._best_quality: float = np.inf
+        self._best_individual, self._best_quality = self._find_best(self._population, self._population_quality)
+        # self._best_quality: float = np.inf
 
         self._current_mutants: np.array = None
         self._current_mutants_quality: np.array = None
         self._best_mutant: np.array = None
         self._best_mutant_quality: float = np.inf
 
-        self._last_avg_population_quality: float = np.inf
+        self._last_avg_population_quality: float = self.get_average_distance_between_individuals()
         self._percent_of_successes: float = 0.
 
-    def step(self, n_epochs):
+    def step(self, n_epochs: int) -> None:
         successes = 0
         self._population_quality = self._calculate_quality(self._population)
         self._best_individual, self._best_quality = self._find_best(self._population, self._population_quality)
@@ -206,18 +204,17 @@ class EvolutionaryAlgorithm:
 
 
 if __name__ == '__main__':
-    algorithm = EvolutionaryAlgorithm(f7, 10, 100, 20, crossing_type=CrossingType.COMPLEX_INTERMEDIATE)
+    from cec2017.functions import f7
+
+    model = EvolutionaryAlgorithm(f7, 10, 20, 5, bounds=(-100, 100))
     distances = []
-    for _ in range(100):
-        distances.append(algorithm.get_percent_of_successes())
-        algorithm.step(20)
+    for _ in range(1000):
+        model.step(1)
+        distances.append(model.get_average_distance_between_individuals())
+
     print(distances)
     import matplotlib.pyplot as plt
 
-    plt.plot(range(100), distances)
+    plt.plot(range(1000), distances)
+    plt.yscale('log')
     plt.show()
-    # print(algorithm._best_quality)
-    # print(algorithm._best_individual)
-    # algorithm.step(10000)
-    # print(algorithm._best_quality)
-    # print(algorithm._best_individual)

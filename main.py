@@ -1,6 +1,5 @@
 import numpy as np
 from cec2017.functions import *
-from algorithm import evolutionary_algorithm, CrossingType
 
 
 def generate_start_population(population_size: int, dimension: int, min_range: float, max_range: float) -> np.array:
