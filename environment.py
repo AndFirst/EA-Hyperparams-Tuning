@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from EA import EvolutionaryAlgorithm, CrossingType
 from cec2017.functions import *
 from q_learning import q_learning_greedy, show_model
+from tabulate import tabulate
 
 
 def _to1DSpace(space: tuple[int, int], coord: tuple[int, int]) -> int:
@@ -19,7 +20,7 @@ def _to2DSpace(space: tuple[int, int], coord: int) -> tuple[int, int]:
 
 class EvolutionaryEnv(gym.Env):
     def __init__(self, max_steps: int, model: EvolutionaryAlgorithm) -> None:
-        self._action_dim = (len(CrossingType), 5)
+        self._action_dim = (len(CrossingType), 3)
         self._observation_dim = (5, 5)
 
         self._success_bins = np.linspace(0, 1, num=self._observation_dim[0] - 1)
@@ -74,11 +75,33 @@ class EvolutionaryEnv(gym.Env):
         # if result < -100000:
         #     result = -100000
         return result
+    
+    def print_Q(self, Q: np.array):
+        headers = ["state/action"]
+
+        def _1DtoAction(i: int):
+            selected_crossover, crossover_probability = _to2DSpace(self._action_dim, i)
+            crossover_probability = float(self._crossover_probabilities[crossover_probability])
+            # selected_crossover = CrossingType(selected_crossover)
+            return (selected_crossover, crossover_probability)
+
+        headers.extend([_1DtoAction(x) for x in range(0, Q.shape[1])])
+        table = []
+        for i, row in enumerate(Q):
+            success, distance = _to2DSpace(self._observation_dim, i)
+            formatted_row = []
+            formatted_row.append(f"({success}, {distance})")
+            formatted_row.extend(row)
+            table.append(formatted_row)
+        print(tabulate(table, headers=headers))
+
 
 
 if __name__ == "__main__":
     model = EvolutionaryAlgorithm(f7, 10, 20, 2)
     env = EvolutionaryEnv(30, model)
     Q = q_learning_greedy(env, 0.1, 0.9, 10, 0.9, 1)
+    print(Q.shape)
     # plt.show()
-    print(list(Q))
+    # print(list(Q))
+    env.print_Q(Q)
