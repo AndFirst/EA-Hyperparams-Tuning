@@ -124,7 +124,7 @@ class EvolutionaryAlgorithm:
         for _ in range(population_size):
             first_index = random.randint(0, population_size - 1)
             second_index = random.randint(0, population_size - 1)
-            winner_index = first_index if self._population_quality[first_index] >= self._population_quality[
+            winner_index = first_index if self._population_quality[first_index] <= self._population_quality[
                 second_index] else second_index
             new_population.append(self._population[winner_index])
         self._current_mutants = np.array(new_population)
