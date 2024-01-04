@@ -20,12 +20,14 @@ class EvolutionaryAlgorithm:
                  bounds: Tuple[float, float] = (-10., 10.),
                  mutation_rate: float = 1.0,
                  mutation_prob: float = 0.5,
-                 crossing_type: CrossingType = CrossingType.SINGLE_POINT,
+                 crossing_type: CrossingType = CrossingType.UNIFORM,
                  crossing_prob: float = 0.5) \
             -> None:
         self._f: Callable[[np.array], np.array] = f
-        self._population: np.array = self._generate_start_population(bounds, population_size, dimension)
-        self._population_quality: np.array = self._calculate_quality(self._population)
+        self._population: np.array = self._generate_start_population(
+            bounds, population_size, dimension)
+        self._population_quality: np.array = self._calculate_quality(
+            self._population)
         self._elite_size: int = elite_size
 
         self._mutation_rate: float = mutation_rate
@@ -34,25 +36,27 @@ class EvolutionaryAlgorithm:
         self._crossing_type: CrossingType = crossing_type
         self._crossing_prob: float = crossing_prob
 
-        self._best_individual, self._best_quality = self._find_best(self._population, self._population_quality)
-        # self._best_quality: float = np.inf
+        self._best_individual, self._best_quality = self._find_best(
+            self._population, self._population_quality)
 
         self._current_mutants: np.array = None
         self._current_mutants_quality: np.array = None
         self._best_mutant: np.array = None
         self._best_mutant_quality: float = np.inf
 
-        self._last_avg_population_quality: float = self.get_average_distance_between_individuals()
+        self._last_avg_population_quality: float = float('inf')
         self._percent_of_successes: float = 0.
 
     def step(self, n_epochs: int) -> None:
         successes = 0
         self._population_quality = self._calculate_quality(self._population)
-        self._best_individual, self._best_quality = self._find_best(self._population, self._population_quality)
+        self._best_individual, self._best_quality = self._find_best(
+            self._population, self._population_quality)
         for _ in range(n_epochs):
             self._reproduction()
             self._genetic_operations()
-            self._current_mutants_quality = self._calculate_quality(self._current_mutants)
+            self._current_mutants_quality = self._calculate_quality(
+                self._current_mutants)
 
             self._best_mutant, self._best_mutant_quality = self._find_best(self._current_mutants,
                                                                            self._current_mutants_quality)
@@ -93,26 +97,27 @@ class EvolutionaryAlgorithm:
     def _generate_start_population(self, bounds: Tuple[float, float], size: int, dimension: int) -> np.array:
         return np.array([np.random.uniform(bounds[0], bounds[1], dimension) for _ in range(size)])
 
-    def _crossing(self) -> np.array:
+    def _crossing(self) -> None:
         new_population = []
         while len(new_population) < len(self._population):
             parent_1 = random.choice(self._population)
             parent_2 = random.choice(self._population)
             if random.uniform(0, 1) < self._crossing_prob:
-                new_population.append(parent_1)
-                new_population.append(parent_2)
-            else:
                 chosen_crossing = self._get_crossing()
                 child_1, child_2 = chosen_crossing(parent_1, parent_2)
                 new_population.append(child_1)
                 new_population.append(child_2)
+            else:
+                new_population.append(parent_1)
+                new_population.append(parent_2)
         self._current_mutants = np.array(new_population)
 
-    def _mutation(self) -> np.array:
+    def _mutation(self) -> None:
         new_population: list = []
         for individual in self._current_mutants:
             if random.uniform(0, 1) < self._mutation_prob:
-                new_individual = individual + self._mutation_rate * random.gauss(0, 1)
+                new_individual = individual + \
+                    self._mutation_rate * random.gauss(0, 1)
                 new_population.append(new_individual)
             else:
                 new_population.append(individual)
@@ -133,7 +138,8 @@ class EvolutionaryAlgorithm:
         if self._elite_size == 0:
             self._population = self._current_mutants
 
-        self._population, self._population_quality = self._sort(self._population, self._population_quality)
+        self._population, self._population_quality = self._sort(
+            self._population, self._population_quality)
         self._current_mutants, self._current_mutants_quality = self._sort(self._current_mutants,
                                                                           self._current_mutants_quality)
         new_population = np.concatenate(
@@ -149,8 +155,10 @@ class EvolutionaryAlgorithm:
         self._mutation()
 
     def _sort(self, population: np.array, population_quality: np.array) -> Tuple[np.array, np.array]:
-        zipped_lists = list(sorted(zip(population_quality, population), key=lambda x: x[0]))
-        sorted_quality, sorted_population = [a for a, b in zipped_lists], [b for a, b in zipped_lists]
+        zipped_lists = list(
+            sorted(zip(population_quality, population), key=lambda x: x[0]))
+        sorted_quality, sorted_population = [
+            a for a, b in zipped_lists], [b for a, b in zipped_lists]
         return np.array(sorted_population), np.array(sorted_quality)
 
     def _calculate_quality(self, population: np.array) -> np.array:
@@ -164,12 +172,20 @@ class EvolutionaryAlgorithm:
 
     def _get_crossing(self) -> Callable[[np.array, np.array], Tuple[np.array, np.array]]:
         def single_point(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+            """
+            Krzyżowanie jednopunktowe. Losujemy punkt rozcięcia. Zamieniamy odcięte części
+            """
             cut_index = random.randint(0, len(parent_1) - 1)
-            child_1 = np.concatenate([parent_1[:cut_index], parent_2[cut_index:]])
-            child_2 = np.concatenate([parent_2[:cut_index], parent_1[cut_index:]])
+            child_1 = np.concatenate(
+                [parent_1[:cut_index], parent_2[cut_index:]])
+            child_2 = np.concatenate(
+                [parent_2[:cut_index], parent_1[cut_index:]])
             return child_1, child_2
 
         def uniform(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+            """
+            Każdy gen jest losowany od jednego z rodziców.
+            """
             child_1 = []
             child_2 = []
             for i in range(len(parent_1)):
@@ -182,15 +198,23 @@ class EvolutionaryAlgorithm:
             return np.array(child_1), np.array(child_2)
 
         def simple_intermediate(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+            """
+            Losujemy wagę, następnie liczymy średnią ważoną genów od obu rodziców
+            """
             weight = random.uniform(0, 1)
             child_1 = weight * parent_1 + (1 - weight) * parent_2
             child_2 = weight * parent_2 + (1 - weight) * parent_1
             return child_1, child_2
 
         def complex_intermediate(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+            """
+            Losujemy wektor wag, średnią ważoną liczymy według wagi dla danego indeksu
+            """
             weights = np.random.uniform(0, 1, len(parent_1))
-            child_1 = weights * parent_1 + (np.ones(len(parent_1)) - weights) * parent_2
-            child_2 = weights * parent_2 + (np.ones(len(parent_1)) - weights) * parent_1
+            child_1 = weights * parent_1 + \
+                (np.ones(len(parent_1)) - weights) * parent_2
+            child_2 = weights * parent_2 + \
+                (np.ones(len(parent_1)) - weights) * parent_1
             return child_1, child_2
 
         functions: Dict[CrossingType, Callable[[np.array, np.array], Tuple[np.array, np.array]]] = {
@@ -201,20 +225,3 @@ class EvolutionaryAlgorithm:
         }
 
         return functions.get(self._crossing_type)
-
-
-if __name__ == '__main__':
-    from cec2017.functions import f7
-
-    model = EvolutionaryAlgorithm(f7, 10, 20, 5, bounds=(-100, 100))
-    distances = []
-    for _ in range(1000):
-        model.step(1)
-        distances.append(model.get_average_distance_between_individuals())
-
-    print(distances)
-    import matplotlib.pyplot as plt
-
-    plt.plot(range(1000), distances)
-    plt.yscale('log')
-    plt.show()
