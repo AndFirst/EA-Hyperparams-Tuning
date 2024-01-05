@@ -40,7 +40,7 @@ def q_learning_greedy(env: gym.Env, learning_rate, discount_factor, iterations, 
             avg_reward /= interval
             rewards.append(avg_reward)
             episodes.append(episode)
-            print(f"{episode}: {avg_reward}")
+            # print(f"{episode}: {avg_reward}")
             avg_reward = 0
 
     return Q

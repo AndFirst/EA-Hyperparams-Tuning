@@ -1,3 +1,4 @@
+import numpy as np
 from src.EA import EvolutionaryAlgorithm, CrossingType
 from src.environment import EvolutionaryEnv
 from src.q_learning import q_learning_greedy, use_trained_q_table
@@ -8,14 +9,14 @@ import json
 import time
 
 # parametry środowiska
-ENV_STEP_SIZE = 20  # z tylu rund środowisko zbiera dane o stanie algorytmu ewolucyjnego
-ENV_MAX_STEPS = 20  # tyle razy algorytm ewolucyjny uruchamiany jest na ENV_STEP_SIZE rund
+ENV_STEP_SIZE = 10  # z tylu rund środowisko zbiera dane o stanie algorytmu ewolucyjnego
+ENV_MAX_STEPS = 30  # tyle razy algorytm ewolucyjny uruchamiany jest na ENV_STEP_SIZE rund
 
 # parametry Q-learningu
 LEARNING_RATE = 0.1
 EPSILON = 0.1
 DISCOUNT_FACTOR = 0.9
-Q_LEARNING_ITERATIONS = 50
+Q_LEARNING_ITERATIONS = 100
 
 # parametry algorytmu ewolucyjnego
 DIMENSION = 10
@@ -74,8 +75,10 @@ def q_learning_results():
     all_runs = len(FUNCTIONS) * len(FUNCTIONS_COMBINATIONS) * N_REPEATS
     i = 1
     start_time = time.time()
-
     for function in FUNCTIONS:
+        best_q_table = None
+        best_quality = float(np.inf)
+        best_env = None
         for c, combination in enumerate(FUNCTIONS_COMBINATIONS):
             for run in range(N_REPEATS):
                 print(f'{i}/{all_runs} elapsed_time: {time.time() - start_time}')
@@ -88,14 +91,17 @@ def q_learning_results():
 
                 use_trained_q_table(env, Q)
 
-                results[function.__name__][f"comb_{c}"].append(
-                    env._model._best_quality)
+                quality = env._model._best_quality
+                
+                if quality < best_quality:
+                    best_quality = quality
+                    best_q_table = Q
+                    best_env = env
+                results[function.__name__][f"comb_{c}"].append(quality)
                 i += 1
+        best_env.export_Q_to_csv(best_q_table, f"results/best_q_{function.__name__}.csv")
+        
     print(f'{i}/{all_runs} elapsed_time: {time.time()- start_time}')
-    with open('data/q_results.json', 'w') as file:
+    with open('results/q_results.json', 'w') as file:
         json.dump(results, file)
 
-
-if __name__ == '__main__':
-    q_learning_results()
-    base_results()

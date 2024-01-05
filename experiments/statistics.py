@@ -84,8 +84,5 @@ def calculate_q_results_statistics():
     
     # Zapisanie do pliku csv
     grouped_df.to_csv("results/q_data.csv", index=False)
-    
-if __name__ == "__main__":
-    calculate_base_results_statistics()
-    calculate_q_results_statistics()
+
     

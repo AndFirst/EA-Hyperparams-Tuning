@@ -59,9 +59,9 @@ class EvolutionaryEnv(gym.Env):
             self._crossover_probabilities[crossover_probability])
         selected_crossover = CrossingType(selected_crossover)
 
-        self._model.step(self._step_size)
         self._model.set_crossing_params(
             selected_crossover, crossover_probability)
+        self._model.step(self._step_size)
         success = np.digitize(
             self._model.get_percent_of_successes(), self._success_bins)
         distance = np.digitize(
