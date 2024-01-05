@@ -1,4 +1,4 @@
-Function,CrossingType,CrossingProb,mean,min,max,std
+Function,CrossingType,CrossingProb,Value mean,Value min,Value max,Value std
 f20,COMPLEX_INTERMEDIATE,0.0,2556.87,2360.86,2723.43,100.24
 f20,COMPLEX_INTERMEDIATE,0.25,2311.78,2225.6,2473.44,100.87
 f20,COMPLEX_INTERMEDIATE,0.5,2401.98,2224.73,2452.21,86.77
