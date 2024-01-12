@@ -77,11 +77,11 @@ class EvolutionaryEnv(gym.Env):
 
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[Any, dict[str, Any]]:
         self._current_step = 0
-        self._model = self._start_model
+        self._model.reset()
+        # print('env:', self._model._best_quality)
         self._last_best_quality = np.inf
         self._last_successes_bin = 0
         self._last_distance_bin = 0
-
         success = np.digitize(
             self._model.get_percent_of_successes(), self._success_bins)
         distance = np.digitize(

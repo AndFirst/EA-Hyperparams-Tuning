@@ -1,6 +1,5 @@
 import gymnasium as gym
 import numpy as np
-import matplotlib.pyplot as plt
 import random
 
 
@@ -40,22 +39,22 @@ def q_learning_greedy(env: gym.Env, learning_rate, discount_factor, iterations, 
             avg_reward /= interval
             rewards.append(avg_reward)
             episodes.append(episode)
-            # print(f"{episode}: {avg_reward}")
             avg_reward = 0
-
     return Q
 
 
-def use_trained_q_table(env: gym.Env, Q: np.ndarray):
+def use_trained_q_table(env: gym.Env, Q: np.ndarray) -> np.ndarray:
     """
     Uruchamia algorytm ewolucyjny i aktualizuje jego parametry zgodnie z otrzymaną tablicą Q.
     """
+    results_history = list()
     state, _ = env.reset()
-
+    # print('q"', env._model._best_quality)
     terminated = False
     truncated = False
     while not terminated and not truncated:
         action = np.argmax(Q[state, :])
         next_state, _, terminated, truncated, _ = env.step(action)
-
+        results_history.append(env._model._best_quality)
         state = next_state
+    return np.array(results_history)

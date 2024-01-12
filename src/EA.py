@@ -2,6 +2,7 @@ import random
 import numpy as np
 from typing import Callable, Tuple, Dict
 from enum import Enum
+from functools import partial
 
 
 class CrossingType(Enum):
@@ -38,6 +39,29 @@ class EvolutionaryAlgorithm:
 
         self._best_individual, self._best_quality = self._find_best(
             self._population, self._population_quality)
+
+        self._current_mutants: np.array = None
+        self._current_mutants_quality: np.array = None
+        self._best_mutant: np.array = None
+        self._best_mutant_quality: float = np.inf
+
+        self._last_avg_population_quality: float = float('inf')
+        self._percent_of_successes: float = 0.
+
+        self._reset_population = partial(
+            self._generate_start_population,
+            bounds=bounds,
+            size=population_size,
+            dimension=dimension
+        )
+
+    def reset(self):
+        self._population: np.array = self._reset_population()
+        self._population_quality: np.array = self._calculate_quality(
+            self._population)
+        self._best_individual, self._best_quality = self._find_best(
+            self._population, self._population_quality)
+        # print('mod:', self._best_quality)
 
         self._current_mutants: np.array = None
         self._current_mutants_quality: np.array = None
@@ -99,9 +123,9 @@ class EvolutionaryAlgorithm:
 
     def _crossing(self) -> None:
         new_population = []
-        while len(new_population) < len(self._population):
-            parent_1 = random.choice(self._population)
-            parent_2 = random.choice(self._population)
+        while len(new_population) < len(self._current_mutants):
+            parent_1 = random.choice(self._current_mutants)
+            parent_2 = random.choice(self._current_mutants)
             if random.uniform(0, 1) < self._crossing_prob:
                 chosen_crossing = self._get_crossing()
                 child_1, child_2 = chosen_crossing(parent_1, parent_2)
