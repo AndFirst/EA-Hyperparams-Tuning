@@ -61,7 +61,6 @@ class EvolutionaryAlgorithm:
             self._population)
         self._best_individual, self._best_quality = self._find_best(
             self._population, self._population_quality)
-        # print('mod:', self._best_quality)
 
         self._current_mutants: np.array = None
         self._current_mutants_quality: np.array = None

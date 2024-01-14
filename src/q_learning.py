@@ -46,10 +46,10 @@ def q_learning_greedy(env: gym.Env, learning_rate, discount_factor, iterations, 
 def use_trained_q_table(env: gym.Env, Q: np.ndarray) -> np.ndarray:
     """
     Uruchamia algorytm ewolucyjny i aktualizuje jego parametry zgodnie z otrzymaną tablicą Q.
+    Zwraca historię najlepszych punktów.
     """
     results_history = list()
     state, _ = env.reset()
-    # print('q"', env._model._best_quality)
     terminated = False
     truncated = False
     while not terminated and not truncated:
