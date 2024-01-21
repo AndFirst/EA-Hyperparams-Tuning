@@ -167,4 +167,4 @@ def calculate_cross_q_stats():
         df.to_csv(output_csv_path, index=False)
 
     calculate_stats('results/f4_q9_results.json', 'f4_q9')
-    calculate_stats('results/f4_q9_results.json', 'f9_q4')
+    calculate_stats('results/f9_q4_results.json', 'f9_q4')
