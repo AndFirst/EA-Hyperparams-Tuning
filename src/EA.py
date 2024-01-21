@@ -18,7 +18,7 @@ class EvolutionaryAlgorithm:
                  dimension: int,
                  population_size: int,
                  elite_size: int,
-                 bounds: Tuple[float, float] = (-10., 10.),
+                 bounds: Tuple[float, float] = (-100., 100.),
                  mutation_rate: float = 1.0,
                  mutation_prob: float = 0.5,
                  crossing_type: CrossingType = CrossingType.UNIFORM,
@@ -121,18 +121,20 @@ class EvolutionaryAlgorithm:
         return np.array([np.random.uniform(bounds[0], bounds[1], dimension) for _ in range(size)])
 
     def _crossing(self) -> None:
+        """
+        Zmieniono sposób krzyżowania. Teraz dla każdego z populacji wygenerowanej
+        w reprodukcji, losujemy partnera i tworzymy potomka. Zmieniono również 
+        poszczególne funkcje krzyżowania, tak aby zwracały jednego potomka.
+        """
         new_population = []
-        while len(new_population) < len(self._current_mutants):
-            parent_1 = random.choice(self._current_mutants)
-            parent_2 = random.choice(self._current_mutants)
+        for mutant in self._current_mutants:
             if random.uniform(0, 1) < self._crossing_prob:
+                partner = random.choice(self._current_mutants)
                 chosen_crossing = self._get_crossing()
-                child_1, child_2 = chosen_crossing(parent_1, parent_2)
-                new_population.append(child_1)
-                new_population.append(child_2)
+                child = chosen_crossing(mutant, partner)
+                new_population.append(child)
             else:
-                new_population.append(parent_1)
-                new_population.append(parent_2)
+                new_population.append(mutant)
         self._current_mutants = np.array(new_population)
 
     def _mutation(self) -> None:
@@ -193,54 +195,46 @@ class EvolutionaryAlgorithm:
         best_individual: np.array = population[best_index]
         return best_individual, best_quality
 
-    def _get_crossing(self) -> Callable[[np.array, np.array], Tuple[np.array, np.array]]:
-        def single_point(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+    def _get_crossing(self) -> Callable[[np.array, np.array], np.array]:
+        def single_point(parent_1: np.array, parent_2: np.array) -> np.array:
             """
             Krzyżowanie jednopunktowe. Losujemy punkt rozcięcia. Zamieniamy odcięte części
             """
             cut_index = random.randint(0, len(parent_1) - 1)
-            child_1 = np.concatenate(
+            child = np.concatenate(
                 [parent_1[:cut_index], parent_2[cut_index:]])
-            child_2 = np.concatenate(
-                [parent_2[:cut_index], parent_1[cut_index:]])
-            return child_1, child_2
+            return child
 
-        def uniform(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+        def uniform(parent_1: np.array, parent_2: np.array) -> np.array:
             """
             Każdy gen jest losowany od jednego z rodziców.
             """
-            child_1 = []
-            child_2 = []
+            child = []
             for i in range(len(parent_1)):
                 if random.randint(0, 1) == 0:
-                    child_1.append(parent_1[i])
-                    child_2.append(parent_2[i])
+                    child.append(parent_1[i])
                 else:
-                    child_1.append(parent_2[i])
-                    child_2.append(parent_1[i])
-            return np.array(child_1), np.array(child_2)
+                    child.append(parent_2[i])
+            return np.array(child)
 
-        def simple_intermediate(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+        def simple_intermediate(parent_1: np.array, parent_2: np.array) -> np.array:
             """
             Losujemy wagę, następnie liczymy średnią ważoną genów od obu rodziców
             """
             weight = random.uniform(0, 1)
-            child_1 = weight * parent_1 + (1 - weight) * parent_2
-            child_2 = weight * parent_2 + (1 - weight) * parent_1
-            return child_1, child_2
+            child = weight * parent_1 + (1 - weight) * parent_2
+            return child
 
-        def complex_intermediate(parent_1: np.array, parent_2: np.array) -> Tuple[np.array, np.array]:
+        def complex_intermediate(parent_1: np.array, parent_2: np.array) -> np.array:
             """
             Losujemy wektor wag, średnią ważoną liczymy według wagi dla danego indeksu
             """
             weights = np.random.uniform(0, 1, len(parent_1))
-            child_1 = weights * parent_1 + \
+            child = weights * parent_1 + \
                 (np.ones(len(parent_1)) - weights) * parent_2
-            child_2 = weights * parent_2 + \
-                (np.ones(len(parent_1)) - weights) * parent_1
-            return child_1, child_2
+            return child
 
-        functions: Dict[CrossingType, Callable[[np.array, np.array], Tuple[np.array, np.array]]] = {
+        functions: Dict[CrossingType, Callable[[np.array, np.array], np.array]] = {
             CrossingType.SINGLE_POINT: single_point,
             CrossingType.UNIFORM: uniform,
             CrossingType.SIMPLE_INTERMEDIATE: simple_intermediate,

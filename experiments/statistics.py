@@ -89,7 +89,6 @@ def calculate_q_results_statistics():
 def plot_history_data_of_base_results():
     with open('results/base_history_results.json', 'r') as file:
         data = json.load(file)
-
     for crossing_type, crossing_type_data in data.items():
         plt.figure(figsize=(15, 6))
 

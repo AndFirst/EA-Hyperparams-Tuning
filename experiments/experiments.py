@@ -1,7 +1,7 @@
 import numpy as np
 from src.EA import EvolutionaryAlgorithm, CrossingType
 from src.environment import EvolutionaryEnv
-from src.q_learning import q_learning_greedy, use_trained_q_table
+from src.q_learning import q_learning_greedy, use_trained_q_table, import_Q_from_csv
 from src.reward_functions import distance_reward, quality_reward, successes_reward
 from cec2017.functions import *
 from collections import defaultdict
@@ -125,3 +125,28 @@ def q_learning_results():
 
     with open('results/q_history_results.json', 'w') as file:
         json.dump(history_results, file)
+
+
+def cross_q_table(q_path, function, reward, output):
+    Q = import_Q_from_csv(q_path)
+    results = []
+    history = []
+    for i in range(N_REPEATS):
+        model = EvolutionaryAlgorithm(
+            function, DIMENSION, POPULATION_SIZE, ELITE_SIZE)
+        env = EvolutionaryEnv(ENV_MAX_STEPS, ENV_STEP_SIZE, model, reward)
+        current_run_history = use_trained_q_table(env, Q)
+        quality = env._model._best_quality
+        results.append(quality)
+        history.append(current_run_history)
+    with open(f'results/{output}_history.json', 'w') as file:
+        json.dump(history, file)
+    with open(f'results/{output}_results.json', 'w') as file:
+        json.dump(results, file)
+
+
+def cross_q_table_use_results():
+    best_combination = FUNCTIONS_COMBINATIONS[0]
+    function = f4
+    q_path = 'results/best_q_f9.csv'
+    cross_q_table(q_path, function, best_combination)
