@@ -139,6 +139,7 @@ def cross_q_table(q_path, function, reward, output):
         quality = env._model._best_quality
         results.append(quality)
         history.append(current_run_history)
+    history = list(np.mean(history, axis=0))
     with open(f'results/{output}_history.json', 'w') as file:
         json.dump(history, file)
     with open(f'results/{output}_results.json', 'w') as file:
@@ -149,4 +150,8 @@ def cross_q_table_use_results():
     best_combination = FUNCTIONS_COMBINATIONS[0]
     function = f4
     q_path = 'results/best_q_f9.csv'
-    cross_q_table(q_path, function, best_combination)
+    cross_q_table(q_path, function, best_combination, 'f4_q9')
+
+    function = f9
+    q_path = 'results/best_q_f4.csv'
+    cross_q_table(q_path, function, best_combination, 'f9_q4')

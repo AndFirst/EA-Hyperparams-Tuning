@@ -120,3 +120,51 @@ def plot_history_data_of_q_results():
         plt.ylabel("Wartość funkcji")
         plt.tight_layout(pad=0)
         plt.savefig(f'plots/wykresy_q_{function}')
+
+
+def plot_cross_q_history():
+    def plot_one_function(file_path, output_name):
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+
+        plt.figure(figsize=(15, 6))
+        plt.plot(range(0, len(data)*20, 20), data)
+        plt.xlabel("Ilość epok")
+        plt.ylabel("Wartość funkcji")
+        plt.tight_layout(pad=0)
+        plt.savefig(f'plots/{output_name}.png')
+
+    plot_one_function('results/f4_q9_history.json', 'f4_q9_history_plot')
+    plot_one_function('results/f9_q4_history.json', 'f9_q4_history_plot')
+
+
+def calculate_cross_q_stats():
+    def calculate_stats(file_path, output_name):
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        values = np.array(data)
+
+        # Średnia
+        mean_value = np.mean(values)
+
+        # Minimum
+        min_value = np.min(values)
+
+        # Maksimum
+        max_value = np.max(values)
+
+        # Odchylenie standardowe
+        std_value = np.std(values)
+
+        # Utwórz DataFrame z wynikami
+        df = pd.DataFrame({
+            'Statystyka': ['Value mean', 'Value min', 'Value max', 'Value std'],
+            'Wartość': [mean_value, min_value, max_value, std_value]
+        })
+
+        # Zapisz do pliku CSV
+        output_csv_path = f"results/{output_name}_stats.csv"
+        df.to_csv(output_csv_path, index=False)
+
+    calculate_stats('results/f4_q9_results.json', 'f4_q9')
+    calculate_stats('results/f4_q9_results.json', 'f9_q4')
